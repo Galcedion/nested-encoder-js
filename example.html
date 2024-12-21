@@ -1,0 +1,20 @@
+<html>
+<head>
+	<title>Example interface for nested-encoder.js</title>
+	<link rel="stylesheet" href="example.css">
+	<script src="nested-encoder.js"></script>
+</head>
+<body>
+	<div><label for="content">Plain string</label><input id="content" type="text"></div>
+	<div><label for="encoding">Encoding pattern</label><input id="encoding" type="text"></div>
+	<div><input type="button" value="Encode" onclick="createResult()"></div>
+	<div><label>Result</label><input id="result" type="text"></div>
+	<script>
+		function createResult() {
+			var content = document.getElementById("content").value;
+			var encoding = document.getElementById("encoding").value;
+			document.getElementById("result").value = nestedEncoder(content, encoding);
+		}
+	</script>
+</body>
+</html>
