@@ -10,8 +10,26 @@ function nestedEncoder(plainString = false, pattern = false) {
 }
 
 function nestedEncoderOptions() {
-	// TODO: JSON listing params and supported encodings
-	return 'nestedEncoderOptions';
+	var options = {};
+	options['parameters'] = ['plainString', 'pattern'];
+	options['encodings'] = {
+		'ascii': 'ASCII',
+		'base<x>': 'different numbering systems where x is the base of the numbering system; x can be one of: 1, 2, 3, 4, 5, 6, 7, 8, 12, 16, 20, 64',
+		'binary': 'see base2',
+		'duodec': 'see base12',
+		'hex': 'see base16',
+		'html': 'HTML based encoding',
+		'oct': 'see base8',
+		'pental': 'see base5',
+		'quaternary': 'see base4',
+		'senary': 'see base6',
+		'septenary': 'see base7',
+		'trinary': 'see base3',
+		'unary': 'see base1',
+		'unicode': 'Unicode based encoding',
+		'vigesimal': 'see base20',
+	};
+	return options;
 }
 
 function nestedEncoderEncode(plainString, pattern) {
@@ -35,6 +53,9 @@ function nestedEncoderEncode(plainString, pattern) {
 			case 'hex':
 			case 'base16':
 				encodedString = nestedEncoderEncodeMultiBase(encodedString, 16);
+				break;
+			case 'html':
+				encodedString = nestedEncoderEncodeHTML(encodedString);
 				break;
 			case 'oct':
 			case 'base8':
@@ -64,13 +85,16 @@ function nestedEncoderEncode(plainString, pattern) {
 			case 'base1':
 				encodedString = nestedEncoderEncodeUnary(encodedString);
 				break;
+			case 'unicode':
+				encodedString = nestedEncoderEncodeUnicode(encodedString);
+				break;
 			case 'vigesimal':
 			case 'base20':
 				encodedString = nestedEncoderEncodeMultiBase(encodedString, 20);
 				break;
 		}
 	}
-	return encodedString;
+	return {'result': encodedString};
 }
 
 function nestedEncoderEncodeAscii(plainString) {
@@ -83,6 +107,14 @@ function nestedEncoderEncodeAscii(plainString) {
 
 function nestedEncoderEncodeBase64(plainString) {
 	return btoa(plainString);
+}
+
+function nestedEncoderEncodeHTML(plainString) {
+	var encodedString = '';
+	for(let i = 0; i < plainString.length; i++) {
+		encodedString += '&#x' + nestedEncoderEncodeMultiBase(nestedEncoderEncodeAscii(plainString[i]), 16) + ';';
+	}
+	return encodedString;
 }
 
 function nestedEncoderEncodeMultiBase(plainString, base) {
@@ -101,4 +133,12 @@ function nestedEncoderEncodeUnary(plainString) {
 		encodedString += '1'.repeat(plainString[i]) + ' ';
 	}
 	return encodedString.trim();
+}
+
+function nestedEncoderEncodeUnicode(plainString) {
+	var encodedString = '';
+	for(let i = 0; i < plainString.length; i++) {
+		encodedString += '\\u' + nestedEncoderEncodeMultiBase(nestedEncoderEncodeAscii(plainString[i]), 16).padStart(4, 0);
+	}
+	return encodedString;
 }

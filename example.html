@@ -13,7 +13,8 @@
 		function createResult() {
 			var content = document.getElementById("content").value;
 			var encoding = document.getElementById("encoding").value;
-			document.getElementById("result").value = nestedEncoder(content, encoding);
+			var process = nestedEncoder(content, encoding);
+			document.getElementById("result").value = process['result'];
 		}
 	</script>
 </body>
