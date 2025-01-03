@@ -24,7 +24,6 @@ If either the pattern parameter or the plainString parameter is not given, neste
 The master function will return a JSON containing following keys
 ```
 result     - The decoded string. Will contain the value 'false' when encodedString was not provided.
-suggestion - The suggested pattern for the given encodedString. Only set when pattern was not provided.
 parameters - A list of parameters that can be provided when using nested-encoder-js. Only set when plainString or pattern was not provided.
 encodings  - A dict of available encodings. Only set when plainString or pattern was not provided.
 ```
