@@ -10,10 +10,9 @@ function nestedEncoder(plainString = false, pattern = false) {
 	if(!plainString || typeof plainString === 'undefined' || !pattern || typeof pattern === 'undefined') {
 		return nestedEncoderOptions();
 	} else {
-		pattern = pattern.toLowerCase();
-		if(typeof pattern !== 'object') {
+		if(typeof pattern !== 'object')
 			pattern = pattern.split(',');
-		}
+		pattern = pattern.map(p => p.toLowerCase());
 		return nestedEncoderEncode(plainString, pattern);
 	}
 
@@ -59,12 +58,13 @@ function nestedEncoder(plainString = false, pattern = false) {
 	function nestedEncoderEncode(plainString, pattern) {
 		var alias = {'binary': 'base2', 'duodec': 'base12', 'hex': 'base16', 'oct': 'base8', 'pental': 'base5', 'quaternary': 'base4', 'senary': 'base6', 'septenary': 'base7', 'trinary': 'base3', 'unary': 'base1', 'vigesimal': 'base20'};
 		var encodedString = plainString;
+		var errors = [];
 		for(let i = 0; i < pattern.length; i++) {
 			/* resolving alias if necessary */
 			if(Object.keys(alias).indexOf(pattern[i]) != -1)
 				pattern[i] = (alias[pattern[i]]);
 			/* process all base<x> encodings */
-			if(pattern[i].startsWith('abase') || pattern[i].startsWith('base')) {
+			if(pattern[i].match(/^a?base[0-9]+$/) !== null) {
 				let base = 0;
 				if(pattern[i][0] == 'a') {
 					encodedString = nestedEncoderEncodeAscii(encodedString);
@@ -72,15 +72,17 @@ function nestedEncoder(plainString = false, pattern = false) {
 				} else {
 					base = pattern[i].substring(4);
 				}
-				if(base == 1)
+				if(base == 1 && encodedString.match(/^[0-9 ]+$/) !== null)
 					encodedString = nestedEncoderEncodeUnary(encodedString);
 				else if(base == 64)
 					encodedString = nestedEncoderEncodeBase64(encodedString);
-				else
+				else if(encodedString.match(/^[0-9 ]+$/) !== null)
 					encodedString = nestedEncoderEncodeMultiBase(encodedString, base);
+				else
+					errors.push(pattern[i] + ' requires integers');
 				continue;
 			} /* process all ROT encodings */
-			else if(pattern[i].startsWith('rot')) {
+			else if(pattern[i].match(/^rot[0-9]+a?$/) !== null) {
 				let move = 0;
 				let fullCharset = false;
 				if(pattern[i].slice(-1) == 'a') {
@@ -91,6 +93,7 @@ function nestedEncoder(plainString = false, pattern = false) {
 				}
 				move = parseInt(move);
 				encodedString = nestedEncoderEncodeRot(encodedString, move, fullCharset);
+				continue;
 			}
 			/* process all other available encodings */
 			switch(pattern[i]) {
@@ -103,9 +106,12 @@ function nestedEncoder(plainString = false, pattern = false) {
 				case 'unicode':
 					encodedString = nestedEncoderEncodeUnicode(encodedString);
 					break;
+				default:
+					errors.push('encoding "' + pattern[i] + '" is not supported');
+					break;
 			}
 		}
-		return {'result': encodedString};
+		return {'result': encodedString, 'errors': errors};
 	}
 
 	/**
