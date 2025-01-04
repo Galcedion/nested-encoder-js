@@ -7,14 +7,34 @@
 <body>
 	<div><label for="content">Plain string</label><input id="content" type="text"></div>
 	<div><label for="encoding">Encoding pattern</label><input id="encoding" type="text"></div>
+	<div id="encodinglist"></div>
 	<div><input type="button" value="Encode" onclick="createResult()"></div>
 	<div><label>Result</label><input id="result" type="text"></div>
+	<div class="error"><strong id="error"></strong></div>
 	<script>
+		window.onload = showEncodings;
 		function createResult() {
 			var content = document.getElementById("content").value;
 			var encoding = document.getElementById("encoding").value;
 			var process = nestedEncoder(content, encoding);
 			document.getElementById("result").value = process['result'];
+			if(process['errors'].length > 0) {
+				document.getElementById("error").textContent = process['errors'].join(' | ');
+			} else {
+				document.getElementById("error").textContent = '';
+			}
+		}
+		function selectEncoding(caller) {
+			document.getElementById("encoding").value += (document.getElementById("encoding").value.slice(-1) == ',' || document.getElementById("encoding").value.length == 0 ? '' : ',') + caller.textContent;
+		}
+		function showEncodings() {
+			var options = nestedEncoder()['encodings'];
+			let html = '<fieldset><legend>Available encodings</legend>';
+			for(const [k, v] of Object.entries(options)) {
+				html += '<strong onclick="selectEncoding(this)">' + k.replace('<', '&#x3c;').replace('>', '&#x3e;') + '</strong> ' + v.replace('<', '&#x3c;').replace('>', '&#x3e;') + '<br>';
+			}
+			html += '</fieldset>';
+			document.getElementById("encodinglist").innerHTML = html;
 		}
 	</script>
 </body>
